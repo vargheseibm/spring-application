@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency-exchange
+spec:
+  template:
+    metadata:
+      labels: 
+        app: currency-exchange
+    spec:
+      containers:
+        - name: currency-exchange-containers
+          image: vargheseibm/mmv2-currency-exchange-service:0.0.11-SNAPSHOT
+          ports:
+            - containerPort: 8000
+          readinessProbe: 
+            httpGet:
+              port: 8000
+              path: /actuator/health/readiness
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+  replicas: 2
+  selector:
+    matchLabels:
+      app: currency-exchange
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: currency-exchange
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: currency-exchange
+    
